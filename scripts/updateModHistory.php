@@ -50,6 +50,9 @@ if (exec($modifiedFilescommand, $output) === false) {
     exit("Could not retrieve info from last commit\n");
 }
 
+echo "Modified files command:\n";
+echo $modifiedFilescommand . "\n";
+
 $modifiedFiles = [];
 $currentType = "";
 foreach ($output as $line) {
