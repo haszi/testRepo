@@ -8,7 +8,7 @@ if (file_exists($modHistoryFile)) {
     $modHistoryArray = include $modHistoryFile;
     if (!is_array($modHistoryArray)) {
 		echo "file is corrupted (not an array)\n";
-        exit;
+        exit(1);
     }
     echo "done\n";
 } else {
@@ -20,15 +20,15 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
 	echo "Verifying last commit hash... ";
     if (exec($cmd, $verifiedHash) === false) {
 		echo "failed\n";
-        exit;
+        exit(1);
     }
-    echo "done\n";
+    echo "done: " . implode("", $verifiedHash) . "\n";
 	
 	echo "Verifying last commit hash is in the master branch's commit history... ";
     if (implode("", $verifiedHash) !== $modHistoryArray["last commit hash"]) {
         // we cannot handle reverted commits as we don't know what changes to roll back
 		echo "failed\n";
-        exit;
+        exit(1);
     }
 	echo "done\n";
     $lastCommitHash = $modHistoryArray["last commit hash"];
@@ -55,9 +55,10 @@ done
 COMMAND;
 
 echo "Getting info on modified files... ";
+fflush();
 if (exec($modifiedFilescommand, $output) === false) {
 	echo "failed\n";
-    exit;
+    exit(1);
 }
 
 echo "done\n";
@@ -108,8 +109,8 @@ foreach ($output as $line) {
 echo "Number of files modified: ";
 if (count($modifiedFiles) === 1) {
     // there will always be 1 entry with the last commit hash
-	echo "0";
-    exit;
+	echo "0\n";
+    exit(1);
 }
 
 echo (count($modifiedFiles) - 1) . "\n";
@@ -141,7 +142,7 @@ $newModHistoryString .= "];\n";
 echo "Writing modification history file... ";
 if (file_put_contents($modHistoryFile, $newModHistoryString) === false) {
 	echo "failed\n";
-    exit;
+    exit(1);
 }
 
 echo "done\n";
