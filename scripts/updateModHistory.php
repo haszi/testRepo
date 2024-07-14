@@ -4,13 +4,18 @@ $modHistoryFile = 'fileModHistory.php';
 
 $modHistoryArray = [];
 if (file_exists($modHistoryFile)) {
+    echo "Retrieving modification history file... ";
     $modHistoryArray = include $modHistoryFile;
     if (!is_array($modHistoryArray)) {
         exit("Corrupted modificiation history file\n");
     }
+    echo "done\n"
+} else {
+    echo "Modification history file doesn't exist\n");
 }
 
 if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit hash"] !== "") {
+    echo "Last commit hash retrieved\n";
     $cmd = "git rev-parse --quiet --verify " . $modHistoryArray["last commit hash"];
     if (exec($cmd, $verifiedHash) === false) {
         exit("Could not retrieve hash of the last commit\n");
@@ -21,6 +26,7 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
     }
     $lastCommitHash = $modHistoryArray["last commit hash"];
 } else {
+    echo "Last commit hash not found\n";
     // since there is no modification history, generate it for all commits since the inital one
     // 4b825dc642cb6eb9a060e54bf8d69288fbee4904 is the SHA1 of the empty git tree
     $lastCommitHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
@@ -89,7 +95,9 @@ foreach ($output as $line) {
 
 if (count($modifiedFiles) === 1) {
     // there will always be 1 entry with the last commit hash
-    exit("No files have been modified\n");
+    echo "No files have been modified\n";
+    echo "Changed files output: " . implode("\n", $output) . "\n";
+    exit;
 }
 
 $mergedModHistory = array_merge($modHistoryArray, $modifiedFiles);
