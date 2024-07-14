@@ -39,6 +39,8 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
     $lastCommitHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 }
 
+echo `echo "$(git rev-parse HEAD)"`;
+
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
