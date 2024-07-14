@@ -15,11 +15,11 @@ if (file_exists($modHistoryFile)) {
 }
 
 if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit hash"] !== "") {
-    echo "Last commit hash retrieved\n";
     $cmd = "git rev-parse --quiet --verify " . $modHistoryArray["last commit hash"];
     if (exec($cmd, $verifiedHash) === false) {
         exit("Could not retrieve hash of the last commit\n");
     }
+    echo "Last commit hash retrieved\n";
     if (implode("", $verifiedHash) !== $modHistoryArray["last commit hash"]) {
         // we cannot handle reverted commits as we don't know what changes to roll back
         exit("Modification history file's commit hash is not in this branch's commit history\n");
@@ -36,7 +36,8 @@ $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
 echo "$(git rev-parse HEAD)"
-git diff --name-only HEAD $lastCommitHash | while read -r filename; do
+git diff $(git merge-base $lastCommitHash master) HEAD --name-only | while read -r filename; do
+# git diff --name-only HEAD $lastCommitHash | while read -r filename; do
   echo "filename:"
   echo "\$filename"
   echo "modified:"
@@ -50,8 +51,7 @@ if (exec($modifiedFilescommand, $output) === false) {
     exit("Could not retrieve info from last commit\n");
 }
 
-echo "Modified files command:\n";
-echo $modifiedFilescommand . "\n";
+echo "Commit changes retrieved\n";
 
 $modifiedFiles = [];
 $currentType = "";
@@ -98,10 +98,10 @@ foreach ($output as $line) {
 
 if (count($modifiedFiles) === 1) {
     // there will always be 1 entry with the last commit hash
-    echo "No files have been modified\n";
-    echo "Changed files output: " . implode("\n", $output) . "\n";
-    exit;
+    exit("No files have been modified");
 }
+
+echo (count($modifiedFiles) - 1) . " file(s) have been modified\n";
 
 $mergedModHistory = array_merge($modHistoryArray, $modifiedFiles);
 
