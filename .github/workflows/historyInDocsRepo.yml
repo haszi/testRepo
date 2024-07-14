@@ -17,8 +17,6 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Update fileModHistory.php
-      env:
-        GITHUB_TOKEN
       run: |
         # generate the updates to fileModHistory.php
         php updateModHistory.php
