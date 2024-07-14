@@ -11,7 +11,7 @@ if (file_exists($modHistoryFile)) {
     }
     echo "done\n";
 } else {
-    echo "Modification history file doesn't exist\n");
+    echo "Modification history file doesn't exist\n";
 }
 
 if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit hash"] !== "") {
