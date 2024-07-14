@@ -55,7 +55,7 @@ done
 COMMAND;
 
 echo "Getting info on modified files... ";
-fflush();
+fflush(\STDOUT);
 if (exec($modifiedFilescommand, $output) === false) {
 	echo "failed\n";
     exit(1);
