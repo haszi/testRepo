@@ -4,10 +4,11 @@ $modHistoryFile = 'fileModHistory.php';
 
 $modHistoryArray = [];
 if (file_exists($modHistoryFile)) {
-    echo "Retrieving modification history file... ";
+    echo "Loading modification history file... ";
     $modHistoryArray = include $modHistoryFile;
     if (!is_array($modHistoryArray)) {
-        exit("Corrupted modificiation history file\n");
+		echo "file is corrupted (not an array)\n";
+        exit;
     }
     echo "done\n";
 } else {
@@ -16,17 +17,23 @@ if (file_exists($modHistoryFile)) {
 
 if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit hash"] !== "") {
     $cmd = "git rev-parse --quiet --verify " . $modHistoryArray["last commit hash"];
+	echo "Verifying last commit hash... ";
     if (exec($cmd, $verifiedHash) === false) {
-        exit("Could not retrieve hash of the last commit\n");
+		echo "failed\n";
+        exit;
     }
-    echo "Last commit hash retrieved\n";
+    echo "done\n";
+	
+	echo "Verifying last commit hash is in the master branch's commit history... ";
     if (implode("", $verifiedHash) !== $modHistoryArray["last commit hash"]) {
         // we cannot handle reverted commits as we don't know what changes to roll back
-        exit("Modification history file's commit hash is not in this branch's commit history\n");
+		echo "failed\n";
+        exit;
     }
+	echo "done\n";
     $lastCommitHash = $modHistoryArray["last commit hash"];
 } else {
-    echo "Last commit hash not found\n";
+    echo "Last commit hash not found: using empty git tree hash\n";
     // since there is no modification history, generate it for all commits since the inital one
     // 4b825dc642cb6eb9a060e54bf8d69288fbee4904 is the SHA1 of the empty git tree
     $lastCommitHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
@@ -47,11 +54,13 @@ git diff $(git merge-base $lastCommitHash master) HEAD --name-only | while read 
 done
 COMMAND;
 
+echo "Getting info on modified files... ";
 if (exec($modifiedFilescommand, $output) === false) {
-    exit("Could not retrieve info from last commit\n");
+	echo "failed\n";
+    exit;
 }
 
-echo "Commit changes retrieved\n";
+echo "done\n";
 
 $modifiedFiles = [];
 $currentType = "";
@@ -96,12 +105,14 @@ foreach ($output as $line) {
     }
 }
 
+echo "Number of files modified: ";
 if (count($modifiedFiles) === 1) {
     // there will always be 1 entry with the last commit hash
-    exit("No files have been modified");
+	echo "0";
+    exit;
 }
 
-echo (count($modifiedFiles) - 1) . " file(s) have been modified\n";
+echo (count($modifiedFiles) - 1) . "\n";
 
 $mergedModHistory = array_merge($modHistoryArray, $modifiedFiles);
 
@@ -127,8 +138,10 @@ foreach ($mergedModHistory as $fileName => $fileProps) {
 }
 $newModHistoryString .= "];\n";
 
+echo "Writing modification history file... ";
 if (file_put_contents($modHistoryFile, $newModHistoryString) === false) {
-    exit("Could not write modification history file\n");
+	echo "failed\n";
+    exit;
 }
 
-echo "Modification history updated\n";
+echo "done\n";
