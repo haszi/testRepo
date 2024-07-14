@@ -9,7 +9,7 @@ if (file_exists($modHistoryFile)) {
     if (!is_array($modHistoryArray)) {
         exit("Corrupted modificiation history file\n");
     }
-    echo "done\n"
+    echo "done\n";
 } else {
     echo "Modification history file doesn't exist\n");
 }
