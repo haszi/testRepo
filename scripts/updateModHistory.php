@@ -39,12 +39,10 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
     $lastCommitHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 }
 
-echo "merge-base ref: ";
-echo `$(git merge-base \$GITHUB_BASE_REF \$GITHUB_REF)`;
-echo "git diff with HEAD and GITHUB_REF: ";
-echo `git diff --name-only \$GITHUB_REF HEAD`;
-echo "git diff with HEAD and GITHUB_BASE_REF: ";
-echo `git diff --name-only \$GITHUB_BASE_REF HEAD`;
+echo "Github Vars: ";
+echo `echo \$GITHUB_BASE_REF`;
+echo `echo \$GITHUB_REF`;
+echo `echo \$GITHUB_SHA`;
 
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
