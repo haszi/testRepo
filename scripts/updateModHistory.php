@@ -40,15 +40,17 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
 }
 
 echo "Github Vars: ";
-echo `echo \$GITHUB_BASE_REF`;
-echo `echo \$GITHUB_REF`;
-echo `echo \$GITHUB_SHA`;
+`echo \$GITHUB_BASE_REF`;
+`echo \$GITHUB_BASE_SHA`;
+`echo \$GITHUB_REF`;
+`echo \$GITHUB_SHA`;
+`echo git diff --name-only \$GITHUB_SHA $(git merge-base \$GITHUB_BASE_SHA \$GITHUB_SHA)`;
 
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
 echo "$(git rev-parse HEAD)"
-git diff --name-only \$GITHUB_REF $(git merge-base \$GITHUB_BASE_REF \$GITHUB_REF) | while read -r filename; do
+git diff --name-only \$GITHUB_SHA $(git merge-base \$GITHUB_BASE_SHA \$GITHUB_SHA) | while read -r filename; do
 # git diff --name-only HEAD $(git merge-base $lastCommitHash master) | while read -r filename; do
 # git diff --name-only HEAD $lastCommitHash | while read -r filename; do
   echo "filename:"
