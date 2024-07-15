@@ -69,6 +69,8 @@ if (exec($modifiedFilescommand, $output) === false) {
 
 echo "done\n";
 
+var_dump($output);
+
 $modifiedFiles = [];
 $currentType = "";
 foreach ($output as $line) {
