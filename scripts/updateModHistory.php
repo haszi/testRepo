@@ -39,13 +39,14 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
     $lastCommitHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 }
 
-echo `echo "$(git rev-parse HEAD)"`;
+echo "merge-base ref: ";
+echo `$(git merge-base \$GITHUB_BASE_REF \$GITHUB_REF)`;
 
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
 echo "$(git rev-parse HEAD)"
-git diff --name-only \$GITHUB_SHA $(git merge-base \$GITHUB_BASE_REF \$GITHUB_SHA) | while read -r filename; do
+git diff --name-only \$GITHUB_REF $(git merge-base \$GITHUB_BASE_REF \$GITHUB_REF) | while read -r filename; do
 # git diff --name-only HEAD $(git merge-base $lastCommitHash master) | while read -r filename; do
 # git diff --name-only HEAD $lastCommitHash | while read -r filename; do
   echo "filename:"
