@@ -45,7 +45,7 @@ $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
 echo "$(git rev-parse HEAD)"
-git diff --name-only HEAD $(git merge-base $GITHUB_BASE_REF $GITHUB_SHA) | while read -r filename; do
+git diff --name-only HEAD $(git merge-base \$GITHUB_BASE_REF \$GITHUB_SHA) | while read -r filename; do
 # git diff --name-only HEAD $(git merge-base $lastCommitHash master) | while read -r filename; do
 # git diff --name-only HEAD $lastCommitHash | while read -r filename; do
   echo "filename:"
