@@ -19,6 +19,7 @@ jobs:
     - name: Update fileModHistory.php
       env:
         GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       run: |
         # generate the updates to fileModHistory.php
         php scripts/updateModHistory.php

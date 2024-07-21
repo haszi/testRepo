@@ -44,14 +44,15 @@ echo `echo \$GITHUB_BASE_REF`;
 echo `echo \$GITHUB_BASE_SHA`;
 echo `echo \$GITHUB_REF`;
 echo `echo \$GITHUB_SHA`;
-echo `echo git diff --name-only \$GITHUB_BASE_REF \$GITHUB_SHA`;
-echo `git diff --name-only \$GITHUB_BASE_SHA \$GITHUB_SHA`;
+echo `echo \$GITHUB_HEAD_SHA`;
+echo `echo git diff --name-only \$GITHUB_HEAD_SHA \$GITHUB_SHA`;
+echo `git diff --name-only \$GITHUB_HEAD_SHA \$GITHUB_SHA`;
 
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
 echo "$(git rev-parse HEAD)"
-git diff --name-only \$GITHUB_BASE_SHA \$GITHUB_SHA | while read -r filename; do
+git diff --name-only \$GITHUB_HEAD_SHA \$GITHUB_SHA | while read -r filename; do
   echo "filename:"
   echo "\$filename"
   echo "modified:"
