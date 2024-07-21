@@ -50,9 +50,12 @@ echo timeStamp() . " - Retrieving commit authors and last commit date/time of mo
 
 $numOfFilesInDir = iterator_count(
     new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(realpath(__DIR__)),
-        RecursiveIteratorIterator::SELF_FIRST
-));
+        new RecursiveDirectoryIterator(
+            realpath(__DIR__),
+            FilesystemIterator::SKIP_DOTS
+        ),
+        RecursiveIteratorIterator::LEAVES_ONLY
+)); // TODO: remove . and .. from count
 $fileCounter = 0;
 
 $modifiedFiles = [];
