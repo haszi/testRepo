@@ -21,19 +21,4 @@ jobs:
         GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       run: |
-        # generate the updates to fileModHistory.php
-        php scripts/updateModHistory.php
-        
-        # Configure git
-        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        
-        # add and amend generated changes to the last commit
-        git add fileModHistory.php            
-        git commit -m "Update fileModHistory.php"
-
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: master
+        git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
