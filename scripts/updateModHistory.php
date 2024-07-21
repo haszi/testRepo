@@ -41,6 +41,7 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
 
 echo "Github Vars: ";
 echo `echo \$GITHUB_BASE_REF`;
+echo `echo \$GITHUB_BASE_SHA`;
 echo `echo \$GITHUB_REF`;
 echo `echo \$GITHUB_SHA`;
 echo `echo git diff --name-only \$GITHUB_BASE_REF \$GITHUB_SHA`;
