@@ -4,7 +4,7 @@ $modHistoryFile = 'fileModHistory.php';
 
 $modHistoryArray = [];
 if (file_exists($modHistoryFile)) {
-    echo "Loading modification history file... ";
+    echo timeStamp() . " - Loading modification history file... ";
     $modHistoryArray = include $modHistoryFile;
     if (!is_array($modHistoryArray)) {
 		echo "file is corrupted (not an array)\n";
@@ -12,38 +12,31 @@ if (file_exists($modHistoryFile)) {
     }
     echo "done\n";
 } else {
-    echo "Modification history file doesn't exist\n";
+    echo timeStamp() . " - Modification history file doesn't exist\n";
 }
 
 if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit hash"] !== "") {
-    $cmd = "git rev-parse --quiet --verify " . $modHistoryArray["last commit hash"];
-	echo "Verifying last commit hash... ";
-    if (exec($cmd, $verifiedHash) === false) {
+    echo timeStamp() . " - Retrieving hash of the common ancestor of HEAD and the last commit... ";
+    $cmd = "git merge-base " . $modHistoryArray["last commit hash"] . "\$GITHUB_SHA";
+    if (exec($cmd, $commonAncestor) === false) {
 		echo "failed\n";
         exit(1);
     }
-    echo "done: " . implode("", $verifiedHash) . "\n";
-	
-	echo "Verifying last commit hash is in the master branch's commit history... ";
-    if (implode("", $verifiedHash) !== $modHistoryArray["last commit hash"]) {
-        // we cannot handle reverted commits as we don't know what changes to roll back
-		echo "failed\n";
-        exit(1);
-    }
-	echo "done\n";
-    $lastCommitHash = $modHistoryArray["last commit hash"];
+    $commonAncestorHash = implode("", $commonAncestor);
+    echo "done: ";
 } else {
-    echo "Last commit hash not found: using empty git tree hash\n";
+    echo timeStamp() . " - Last commit hash not found. Using empty git tree hash: ";
     // since there is no modification history, generate it for all commits since the inital one
     // 4b825dc642cb6eb9a060e54bf8d69288fbee4904 is the SHA1 of the empty git tree
-    $lastCommitHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
+    $commonAncestorHash = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 }
+echo $commonAncestorHash . "\n";
 
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
 echo "$(git rev-parse HEAD)"
-git diff --name-only $(git merge-base $lastCommitHash \$GITHUB_SHA) \$GITHUB_SHA | while read -r filename; do
+git diff --name-only $commonAncestorHash \$GITHUB_SHA | while read -r filename; do
   echo "filename:"
   echo "\$filename"
   echo "modified:"
@@ -53,78 +46,48 @@ git diff --name-only $(git merge-base $lastCommitHash \$GITHUB_SHA) \$GITHUB_SHA
 done
 COMMAND;
 
-echo "Getting info on modified files... ";
-fflush(\STDOUT);
-if (exec($modifiedFilescommand, $output) === false) {
-	echo "failed\n";
-    exit(1);
-}
+echo timeStamp() . " - Retrieving commit authors and last commit date/time of modified files... \n";
 
-echo "done\n";
-
-var_dump($output);
+$numOfFilesInDir = iterator_count(
+    new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(realpath(__DIR__)),
+        RecursiveIteratorIterator::SELF_FIRST
+));
+$fileCounter = 0;
 
 $modifiedFiles = [];
-$currentType = "";
-foreach ($output as $line) {
-    switch ($line) {
-        case "filename:":
-            $currentType = "filename";
-            continue 2;
-        case "modified:":
-            $currentType = "modDateTime";
-            continue 2;
-        case "contributors:":
-            $currentType = "contributors";
-            continue 2;
-        case "last commit hash:":
-            $currentType = "commitHash";
-            continue 2;
-    }
-    if ($currentType === "") {
-        continue;
-    }
 
-    switch ($currentType) {
-        case "filename":
-            $currentFile = $line;
-            break;
-        case "modDateTime":
-            if ($currentFile === "") {
-                continue 2;
-            }
-            $modifiedFiles[$currentFile]["modified"] = $line;
-            break;
-        case "contributors":
-            if ($currentFile === "") {
-                continue 2;
-            }
-            $modifiedFiles[$currentFile]["contributors"][] = htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
-            break;
-        case "commitHash":
-            $modifiedFiles["last commit hash"][] = $line;
-            break;
-    }
+$proc = popen($modifiedFilescommand, 'rb');
+//while (($line = stream_get_line($proc, 65535, "\n")) !== false) {
+while (($line = fgets($proc)) !== false) {
+    processGitDiffLine(rtrim($line, "\n\r"), $modifiedFiles);
+    fwrite(
+        STDERR, 
+        sprintf("\033[0G{$fileCounter} of {$numOfFilesInDir} files read", "", "")
+    );
 }
+pclose($proc);
+    
+echo "done\n";
 
-echo "Number of files modified: ";
+echo timeStamp() . " - Number of files modified since last commit: " . (count($modifiedFiles) - 1) . "\n";
 if (count($modifiedFiles) === 1) {
-    // there will always be 1 entry with the last commit hash
-	echo "0\n";
+    // there will always be at least 1 entry with the last commit hash
     exit(1);
 }
 
-echo (count($modifiedFiles) - 1) . "\n";
-
 $mergedModHistory = array_merge($modHistoryArray, $modifiedFiles);
+    
+echo timeStamp() . " - Writing modification history file... ";
 
-$newModHistoryString = "<?php\n\n/* This is a generated file */\n\nreturn [\n";
+$fp = fopen($modHistoryFile, "w");
+fwrite($fp, "<?php\n\n/* This is a generated file */\n\nreturn [\n");
 foreach ($mergedModHistory as $fileName => $fileProps) {
     if ($fileName === "last commit hash") {
-        $newModHistoryString .= "    \"last commit hash\" => \"" . implode("", $fileProps) . "\",\n";
+        fwrite($fp, "    \"last commit hash\" => \"" . implode("", $fileProps) . "\",\n");
         continue;
     }
-    $newModHistoryString .= '    "' . $fileName . "\" => [\n";
+    $newModHistoryString = '    "' . $fileName . "\" => [\n";
     $newModHistoryString .= "        \"modified\" => \"" . ($fileProps["modified"] ?? "") . "\",\n";
     $newModHistoryString .= "        \"contributors\" => [\n";
     if (isset($fileProps["contributors"])) {
@@ -137,13 +100,59 @@ foreach ($mergedModHistory as $fileName => $fileProps) {
     }
     $newModHistoryString .= "        ],\n";
     $newModHistoryString .= "    ],\n";
+    fwrite($fp, $newModHistoryString);
 }
-$newModHistoryString .= "];\n";
+fwrite($fp, "];\n");
+fclose($fp);
 
-echo "Writing modification history file... ";
-if (file_put_contents($modHistoryFile, $newModHistoryString) === false) {
-	echo "failed\n";
-    exit(1);
+echo "done at " . date('H:i:s') . "\n";
+
+function timeStamp(): string {
+    return "[" . date('H:i:s') . "]";
 }
 
-echo "done\n";
+function processGitDiffLine($line, &$modifiedFiles): void {
+    static $currentType = "";
+    static $currentFile = "";
+    global $fileCounter;
+    
+    switch ($line) {
+        case "filename:":
+            $currentType = "filename";
+            $fileCounter++;
+            return;
+        case "modified:":
+            $currentType = "modDateTime";
+            return;
+        case "contributors:":
+            $currentType = "contributors";
+            return;
+        case "last commit hash:":
+            $currentType = "commitHash";
+            return;
+    }
+    if ($currentType === "") {
+        return;
+    }
+
+    switch ($currentType) {
+        case "filename":
+            $currentFile = $line;
+            break;
+        case "modDateTime":
+            if ($currentFile === "") {
+                return;
+            }
+            $modifiedFiles[$currentFile]["modified"] = $line;
+            break;
+        case "contributors":
+            if ($currentFile === "") {
+                return;
+            }
+            $modifiedFiles[$currentFile]["contributors"][] = htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
+            break;
+        case "commitHash":
+            $modifiedFiles["last commit hash"][] = $line;
+            break;
+    }
+}
