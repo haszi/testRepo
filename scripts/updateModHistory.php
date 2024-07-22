@@ -32,6 +32,15 @@ if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit
 }
 echo $commonAncestorHash . "\n";
 
+echo timeStamp() . " - Retrieving number of files with a diff... ";
+$cmd = "git diff --name-only $commonAncestorHash \$GITHUB_SHA | wc -l";
+if (exec($cmd, $numOfFilesWithDiff) === false) {
+    echo "failed\n";
+    exit(1);
+}
+$numOfFilesWithDiff = implode("", $numOfFilesWithDiff);
+echo "done (" . $numOfFilesWithDiff . ")\n";
+
 $modifiedFilescommand = <<<COMMAND
 #!/usr/bin/env bash
 echo "last commit hash:"
@@ -48,16 +57,7 @@ COMMAND;
 
 echo timeStamp() . " - Retrieving commit authors and last commit date/time of modified files... \n";
 
-$numOfFilesInDir = iterator_count(
-    new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(
-            realpath(__DIR__),
-            FilesystemIterator::SKIP_DOTS
-        ),
-        RecursiveIteratorIterator::LEAVES_ONLY
-)); // TODO: remove . and .. from count
 $fileCounter = 0;
-
 $modifiedFiles = [];
 
 $proc = popen($modifiedFilescommand, 'rb');
@@ -66,7 +66,7 @@ while (($line = fgets($proc)) !== false) {
     processGitDiffLine(rtrim($line, "\n\r"), $modifiedFiles);
     fwrite(
         STDERR, 
-        sprintf("\033[0G{$fileCounter} of {$numOfFilesInDir} files read", "", "")
+        sprintf("\033[0G{$fileCounter} of {$numOfFilesWithDiff} files read", "", "")
     );
 }
 pclose($proc);
