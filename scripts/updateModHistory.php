@@ -1,4 +1,5 @@
 <?php
+
 $modHistoryFile = 'fileModHistory.php';
 
 $modHistoryArray = [];
@@ -15,8 +16,9 @@ if (file_exists($modHistoryFile)) {
 }
 
 if (isset($modHistoryArray["last commit hash"]) && $modHistoryArray["last commit hash"] !== "") {
+    echo timeStamp() . " - Found last commit hash: " . $modHistoryArray["last commit hash"] . "\n";
     echo timeStamp() . " - Retrieving hash of the common ancestor of HEAD and the last commit... ";
-    $cmd = "git merge-base " . $modHistoryArray["last commit hash"] . "\$GITHUB_SHA";
+    $cmd = "git merge-base " . $modHistoryArray["last commit hash"] . " \$GITHUB_SHA";
     if (exec($cmd, $commonAncestor) === false) {
 		echo "failed\n";
         exit(1);
@@ -58,15 +60,17 @@ echo timeStamp() . " - Retrieving commit authors and last commit date/time of mo
 
 $fileCounter = 0;
 $modifiedFiles = [];
+$runningInGithubActions = (getenv("GITHUB_ACTIONS") !== false);
 
 $proc = popen($modifiedFilescommand, 'rb');
-//while (($line = stream_get_line($proc, 65535, "\n")) !== false) {
 while (($line = fgets($proc)) !== false) {
     processGitDiffLine(rtrim($line, "\n\r"), $modifiedFiles);
-    fwrite(
-        STDERR, 
-        sprintf("\033[0G{$fileCounter} of {$numOfFilesWithDiff} files read", "", "")
-    );
+    if (! $runningInGithubActions) {
+        fwrite(
+            STDERR, 
+            sprintf("\033[0G{$fileCounter} of {$numOfFilesWithDiff} files read", "", "")
+        );
+    }
 }
 pclose($proc);
     
