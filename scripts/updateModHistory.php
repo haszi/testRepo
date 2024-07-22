@@ -1,5 +1,4 @@
 <?php
-
 $modHistoryFile = 'fileModHistory.php';
 
 $modHistoryArray = [];

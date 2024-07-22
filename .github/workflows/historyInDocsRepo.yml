@@ -20,14 +20,14 @@ jobs:
 
     - name: Update fileModHistory.php
       run: |
-        # generate the updates to fileModHistory.php
+        # Generate the updates to fileModHistory.php
         php scripts/updateModHistory.php
 
         # Configure git
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
 
-        # add and amend generated changes to the last commit
+        # Add and amend generated changes to the last commit
         git add fileModHistory.php
         git commit -m "Update fileModHistory.php"
 
