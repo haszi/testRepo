@@ -21,9 +21,10 @@ jobs:
 
       - name: Checkout history file
         uses: actions/checkout@v4
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             repository: haszi/fileModHistoryRepo
-            token: ${{ github.token }}
             path: fileModHistory
 
       - name: Get update script
@@ -47,4 +48,4 @@ jobs:
 
           git remote -v
 
-          git push origin master
+          git push https://user:$GITHUB_TOKEN@github.com/haszi/fileModHistoryRepo master
