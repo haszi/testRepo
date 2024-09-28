@@ -21,8 +21,6 @@ jobs:
 
       - name: Checkout history file
         uses: actions/checkout@v4
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             repository: haszi/fileModHistoryRepo
             path: fileModHistory
@@ -46,6 +44,5 @@ jobs:
           git add fileModHistory-repo1.php
           git commit -m "Update fileModHistory-repo1.php"
 
-          git remote -v
-
-          git push https://user:$GITHUB_TOKEN@github.com/haszi/fileModHistoryRepo master
+          # Push fileModHistory
+          git push origin master
