@@ -41,8 +41,8 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
           # Add and amend generated changes to the last commit
-          git add fileModHistory.php
-          git commit -m "Update fileModHistory.php"
+          git add fileModHistory-repo1.php
+          git commit -m "Update fileModHistory-repo1.php"
   
       - name: Push changes
         uses: ad-m/github-push-action@master
