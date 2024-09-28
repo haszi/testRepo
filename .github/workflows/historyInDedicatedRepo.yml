@@ -33,12 +33,12 @@ jobs:
           # Generate the updates to fileModHistory.php
           php updateModHistory.php --docs-path=doc/ --history-path=fileModHistory/fileModHistory-repo1.php
   
+          # Switch to the file mod history directory
+          cd fileModHistory/
+
           # Configure git
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-  
-          # Switch to the file mod history directory
-          cd fileModHistory/
 
           # Add and amend generated changes to the last commit
           git add fileModHistory.php
