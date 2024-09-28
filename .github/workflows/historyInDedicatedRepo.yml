@@ -1,0 +1,44 @@
+on:
+    pull_request:
+      types:
+        - closed
+      branches:
+        - master
+
+permissions:
+    contents: write
+
+jobs:
+    if_merged:
+      if: github.event.pull_request.merged == true
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout documentation
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout history file
+        uses: actions/checkout@v4
+        with:
+            repository: haszi/fileModHistoryRepo
+            path: fileModHistory
+
+      - name: Update fileModHistory.php
+        run: |
+          # Generate the updates to fileModHistory.php
+          php scripts/updateModHistory.php
+  
+          # Configure git
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+  
+          # Add and amend generated changes to the last commit
+          git add fileModHistory.php
+          git commit -m "Update fileModHistory.php"
+  
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master

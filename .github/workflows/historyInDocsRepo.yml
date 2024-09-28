@@ -21,7 +21,7 @@ jobs:
     - name: Update fileModHistory.php
       run: |
         # Generate the updates to fileModHistory.php
-        php scripts/updateModHistory.php
+        php scripts/updateModHistory.php --docs-path=.. --history-path=../fileModHistory.php
 
         # Configure git
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
