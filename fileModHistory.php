@@ -3,29 +3,35 @@
 /* This is a generated file */
 
 return [
-    "last commit hash" => "664586a43d9738d7b69a2bb2d621e0c1a8fc9068",
+    "last commit hash" => "0cb932ce6b26c06c5b234b9bc209f28b9d399001",
     ".github/workflows/historyInDocsRepo.yml" => [
-        "modified" => "2024-07-21T18:32:23+02:00",
+        "modified" => "2024-09-28T19:46:25+02:00",
         "contributors" => [
             "haszi",
         ],
     ],
     "firstTestFile.md" => [
-        "modified" => "2024-07-21T18:33:18+02:00",
+        "modified" => "2024-07-22T22:00:59+02:00",
         "contributors" => [
             "haszi",
         ],
     ],
     "scripts/updateModHistory.php" => [
-        "modified" => "2024-07-21T18:32:23+02:00",
+        "modified" => "2024-09-28T19:46:25+02:00",
         "contributors" => [
             "haszi",
         ],
     ],
     "fileModHistory.php" => [
-        "modified" => "2024-07-21T16:25:46Z",
+        "modified" => "2024-07-21T16:33:30+00:00",
         "contributors" => [
             "github-actions[bot]",
+        ],
+    ],
+    ".github/workflows/historyInDedicatedRepo.yml" => [
+        "modified" => "2024-09-28T19:46:25+02:00",
+        "contributors" => [
+            "haszi",
         ],
     ],
 ];

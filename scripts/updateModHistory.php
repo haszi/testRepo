@@ -95,7 +95,8 @@ pclose($proc);
 
 echo " done\n";
 
-echo timeStamp() . " - Number of files modified since last commit: " . (count($modifiedFiles) - 1) . "\n";
+$s = ($modifiedFiles > 2) ? "s" : "";
+echo timeStamp() . " - Retrieved author$s and last commit date$s/time$s for " . (count($modifiedFiles) - 1) . " file$s\n";
 if (count($modifiedFiles) === 1) {
     // there will always be at least 1 entry with the last commit hash
     exit(1);
