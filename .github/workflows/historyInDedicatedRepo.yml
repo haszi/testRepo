@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
             repository: haszi/fileModHistoryRepo
+            token: ${{secrets.PAT}}
             path: fileModHistory
 
       - name: Get update script
