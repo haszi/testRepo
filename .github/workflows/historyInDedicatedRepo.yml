@@ -46,6 +46,4 @@ jobs:
 
           git remote -v
 
-          git config --unset-all http.https://github.com/.extraheader
-
           git push origin master
